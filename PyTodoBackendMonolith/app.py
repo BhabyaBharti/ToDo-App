@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-connection_string = "Driver={ODBC Driver 17 for SQL Server};Server=tcp:todoserverimage.database.windows.net,1433;Database=todo-db;Uid=azureacuser;Pwd=containeruser@123;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+connection_string = "Driver={ODBC Driver 17 for SQL Server};Server=tcp:sqlautom.database.windows.net,1433;Database=tododb;Uid=azuser;Pwd=todoappuser@123;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 
 app = FastAPI()
 
