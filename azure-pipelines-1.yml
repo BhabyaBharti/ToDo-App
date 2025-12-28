@@ -89,7 +89,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              cd $(frontendFolder)
+              cd $(frontendPath)
                             npm install
                             npm install --save-dev retire
                             npx retire --outputformat json --outputpath retire-report.json --severity high
