@@ -75,10 +75,20 @@ stages:
           inputs:
             versionSource: 'spec'
             versionSpec: '18.x'
+          displayName: 'Install NodeJS'
+        
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(frontendPath)
+               npm install  # Ye package-lock.json banayega for accurate version scan
+          displayName: 'Install frontend dependencies for scan'
 
         - task: Retire@1
           inputs:
             path: '$(frontendPath)'
+            verbose: true
             failOnVulnerabilities: true
           displayName: 'Retire.js Scan'
 
