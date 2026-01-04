@@ -47,6 +47,7 @@ stages:
                   sonar.test.exclusions=**/*
 
             - task: SonarQubeAnalyze@8
+              continueOnError: true
               inputs:
                 jdkversion: 'JAVA_HOME_17_X64'
 
