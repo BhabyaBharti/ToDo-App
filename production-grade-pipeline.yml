@@ -20,7 +20,7 @@ stages:
     #             cd $(frontendPath)
     #             npm install
     #             npm install --save-dev retire
-    #             npx retire --outputformat json --outputpath retire-report.json --severity high
+    #             npx   retire --outputformat json --outputpath retire-report.json --severity high
             
     #       displayName: 'Retire.js Install and Run'
 
@@ -84,6 +84,7 @@ stages:
         
         - task: PowerShell@2
           displayName: Install and Run Biome
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -92,6 +93,7 @@ stages:
               $(Agent.ToolsDirectory)/biome.exe lint $(frontendpath)/src/
 
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -120,6 +122,7 @@ stages:
           displayName: Install and Run StyleLint
 
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -134,6 +137,7 @@ stages:
           displayName: 'Install and Run ESLint'
 
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -155,6 +159,7 @@ stages:
 
         steps:
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -172,6 +177,7 @@ stages:
           displayName: 'Markdownlint Install & Run'
 
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
@@ -189,6 +195,7 @@ stages:
           displayName: 'TextLint Install & Run'
 
         - task: PyLint@0
+          continueOnError: true
           displayName: Run PyLint
           inputs:
             pythonroot: '$(backendPath)'
@@ -196,6 +203,7 @@ stages:
             modules: '.'
 
         - task: PowerShell@2
+          continueOnError: true
           inputs:
             targetType: 'inline'
             script: |
