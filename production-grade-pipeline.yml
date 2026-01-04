@@ -42,7 +42,7 @@ stages:
                 cliSources: '.'
                 extraProperties: |
                   sonar.organization=bhabyabharti
-                  sonar.host.url='https://sonarcloud.io'
+                  sonar.host.url=https://sonarcloud.io
                   sonar.tests=
                   sonar.test.exclusions=**/*
 
