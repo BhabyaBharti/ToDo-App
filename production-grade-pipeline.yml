@@ -40,6 +40,11 @@ stages:
                 cliProjectKey: 'BhabyaBharti_ToDo-App'
                 cliProjectName: 'ToDo-App'
                 cliSources: '.'
+                extraProperties: |
+                  sonar.organization=bhabyabharti
+                  sonar.host.url='https://sonarcloud.io'
+                  sonar.tests=
+                  sonar.test.exclusions=**/*
 
             - task: SonarQubeAnalyze@8
               inputs:
