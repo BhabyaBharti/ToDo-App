@@ -24,246 +24,245 @@ stages:
             
     #       displayName: 'Retire.js Install and Run'
 
-    - stage: StaticCodeAnalysis
-      displayName: Static Code Analysis (SonarQube)
-
-      jobs:
-          - job: SonarQubeScan
-            displayName: SonarQube Scan
-
-            steps:
-            - task: SonarQubePrepare@8
-              inputs:
-                SonarQube: 'SonarCloud'
-                scannerMode: 'cli'
-                configMode: 'manual'
-                cliProjectKey: 'BhabyaBharti_ToDo-App'
-                cliProjectName: 'ToDo-App'
-                cliSources: '.'
-                extraProperties: |
-                  sonar.organization=bhabyabharti
-                  sonar.host.url=https://sonarcloud.io
-                  sonar.tests=
-                  sonar.test.exclusions=**/*
-
-            - task: SonarQubeAnalyze@8
-              continueOnError: true
-              inputs:
-                jdkversion: 'JAVA_HOME_17_X64'
-
-            - task: SonarQubePublish@8
-              inputs:
-                pollingTimeoutSec: '300'
-
-    # - stage: CodeQualityChecks
-    #   displayName: Code Quality & Linting
+    # - stage: StaticCodeAnalysis
+    #   displayName: Static Code Analysis (SonarQube)
 
     #   jobs:
-    #   - job: LintFrontend
-    #     displayName: 'Lint React Frontend'
+    #       - job: SonarQubeScan
+    #         displayName: SonarQube Scan
 
-    #     steps:
-    #     - task: NodeTool@0
-    #       inputs:
-    #         versionSource: 'spec'
-    #         versionSpec: '18.x'
-    #       displayName: 'Install NodeJS'
+    #         steps:
+    #         - task: SonarQubePrepare@8
+    #           inputs:
+    #             SonarQube: 'SonarCloud'
+    #             scannerMode: 'cli'
+    #             configMode: 'manual'
+    #             cliProjectKey: 'BhabyaBharti_ToDo-App'
+    #             cliProjectName: 'ToDo-App'
+    #             cliSources: '.'
+    #             extraProperties: |
+    #               sonar.organization=bhabyabharti
+    #               sonar.host.url=https://sonarcloud.io
+    #               sonar.tests=
+    #               sonar.test.exclusions=**/*
 
-    #     # - task: PowerShell@2
-    #     #   displayName: Install and Run HTMLHint
-    #     #   inputs:
-    #     #     targetType: 'inline'
-    #     #   script: |
-    #     #     cd $(frontendPath/src)       
-    #     #     npm install       
-    #     #     # Install HTMLHint if not in package.json (run locally once and commit)       
-    #     #     npm install --save-dev htmlhint
-    #     #     npx htmlhint "**/*.html"
+    #         - task: SonarQubeAnalyze@8
+    #           continueOnError: true
+    #           inputs:
+    #             jdkversion: 'JAVA_HOME_17_X64'
+
+    #         - task: SonarQubePublish@8
+    #           inputs:
+    #             pollingTimeoutSec: '300'
+
+    - stage: CodeQualityChecks
+      displayName: Code Quality & Linting
+
+      jobs:
+      - job: LintFrontend
+        displayName: 'Lint React Frontend'
+
+        steps:
+        - task: NodeTool@0
+          inputs:
+            versionSource: 'spec'
+            versionSpec: '18.x'
+          displayName: 'Install NodeJS'
+
+        # - task: PowerShell@2
+        #   displayName: Install and Run HTMLHint
+        #   inputs:
+        #     targetType: 'inline'
+        #   script: |
+        #     cd $(frontendPath/src)       
+        #     npm install       
+        #     # Install HTMLHint if not in package.json (run locally once and commit)       
+        #     npm install --save-dev htmlhint
+        #     npx htmlhint "**/*.html"
         
-    #     #   displayName: 'HTMLHint Run'
+        #   displayName: 'HTMLHint Run'
         
-    #     - task: PowerShell@2
-    #       displayName: Install and Run Biome
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
+        - task: PowerShell@2
+          displayName: Install and Run Biome
+          inputs:
+            targetType: 'inline'
+            script: |
 
-    #         Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.3.8/biome-win32-x64.exe" -OutFile "$(Agent.ToolsDirectory)/biome.exe"
-    #         $(Agent.ToolsDirectory)/biome.exe lint $(frontendpath)/src/
+              Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.3.8/biome-win32-x64.exe" -OutFile "$(Agent.ToolsDirectory)/biome.exe"
+              $(Agent.ToolsDirectory)/biome.exe lint $(frontendpath)/src/
 
-    #       displayName: 'Biome Run'
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "Initializing npm project..."
+                npm init -y
 
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         Write-Host "Initializing npm project..."
-    #           npm init -y
+                Write-Host "Installing Stylelint and standard configs..."
+                npm install stylelint stylelint-config-standard stylelint-config-recommended --save-dev
 
-    #           Write-Host "Installing Stylelint and standard configs..."
-    #           npm install stylelint stylelint-config-standard stylelint-config-recommended --save-dev
+                Write-Host "Creating .stylelintrc.json..."
+                @"
+                {
+                  "extends": [
+                    "stylelint-config-standard",
+                    "stylelint-config-recommended"
+                  ]
+                }
+                "@ | Out-File -FilePath ".stylelintrc.json" -Encoding UTF8
 
-    #           Write-Host "Creating .stylelintrc.json..."
-    #           @"
-    #           {
-    #             "extends": [
-    #               "stylelint-config-standard",
-    #               "stylelint-config-recommended"
-    #             ]
-    #           }
-    #           "@ | Out-File -FilePath ".stylelintrc.json" -Encoding UTF8
+                Write-Host "Running Stylelint (errors will NOT fail pipeline)..."
+                # Run stylelint but ALWAYS return success
+                npx stylelint "**/*.css" "**/*.scss"
+                # Force task to succeed even if errors are present
+                $LASTEXITCODE = 0
 
-    #           Write-Host "Running Stylelint (errors will NOT fail pipeline)..."
-    #           # Run stylelint but ALWAYS return success
-    #           npx stylelint "**/*.css" "**/*.scss"
-    #           # Force task to succeed even if errors are present
-    #           $LASTEXITCODE = 0
+          displayName: Install and Run StyleLint
 
-    #       displayName: Install and Run StyleLint
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(frontendPath)
+                npm install
+                # Install lint tools if not in package.json (run locally once and commit)
+                npm install --save-dev eslint @eslint/js globals eslint-plugin-react eslint-config-standard 
+                npx eslint src/ --ext .js,.jsx,.ts,.tsx
+                npx stylelint "**/*.css"
+                npx biome lint ./src
 
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         cd $(frontendPath)
-    #           npm install
-    #           # Install lint tools if not in package.json (run locally once and commit)
-    #           npm install --save-dev eslint @eslint/js globals eslint-plugin-react eslint-config-standard 
-    #           npx eslint src/ --ext .js,.jsx,.ts,.tsx
-    #           npx stylelint "**/*.css"
-    #           npx biome lint ./src
+          displayName: 'Install and Run ESLint'
 
-    #       displayName: 'Install and Run ESLint'
-
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         cd $(frontendPath)
-    
-    #         # Install dependencies
-    #         npm install
-            
-    #         # Install markdownlint-cli if not in package.json
-    #         npm install --save-dev markdownlint-cli
-            
-    #         # Run markdownlint on all markdown files, excluding node_modules
-    #         npx markdownlint "**/*.md" --ignore node_modules
-    #       displayName: 'HTMLHint Run'
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(frontendPath)
       
-    #   - job: LintBackend
-    #     displayName: Lint Python Backend
-
-    #     steps:
-
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         ncd $(backendPath)
-    
-    #         # Install dependencies
-    #         npm install
-            
-    #         # Install markdownlint-cli if not in package.json
-    #         npm install --save-dev markdownlint-cli
-            
-    #         # Run markdownlint on all markdown files, excluding node_modules
-    #         npx markdownlint "**/*.md" --ignore node_modules
-
-    #       displayName: 'Markdownlint Install & Run'
-
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         cd $(backendPath)
-    
-    #         # Install dependencies
-    #         npm install
-            
-    #         # Install textlint and common presets if not in package.json
-    #         npm install --save-dev textlint textlint-rule-preset-ja-technical-writing
-            
-    #         # Run textlint on markdown files
-    #         npx textlint "**/*.md"
-
-    #       displayName: 'TextLint Install & Run'
-
-    #     - task: PyLint@0
-    #       displayName: Run PyLint
-    #       inputs:
-    #         pythonroot: '$(backendPath)'
-    #         reqfile: '$(backendPath)/requirements.txt'
-    #         modules: '.'
-
-    #     - task: PowerShell@2
-    #       inputs:
-    #         targetType: 'inline'
-    #       script: |
-    #         # Install Hadolint (Windows)
-    #         Write-Host "Installing Hadolint for Dockerfile linting..."
-            
-    #         # Method 1: Using Chocolatey (if available)
-    #         if (Get-Command choco -ErrorAction SilentlyContinue) {
-    #           Write-Host "Installing via Chocolatey..."
-    #           choco install hadolint -y
-    #         } else {
-    #           # Method 2: Download executable directly
-    #           Write-Host "Downloading Hadolint executable..."
-    #           $hadolintUrl = "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Windows-x86_64.exe"
-    #           $hadolintPath = "$env:TEMP\hadolint.exe"
+              # Install dependencies
+              npm install
               
-    #           Invoke-WebRequest -Uri $hadolintUrl -OutFile $hadolintPath
+              # Install markdownlint-cli if not in package.json
+              npm install --save-dev markdownlint-cli
               
-    #           # Make it available globally
-    #           Copy-Item $hadolintPath "$env:ProgramFiles\hadolint\hadolint.exe"
-    #           [Environment]::SetEnvironmentVariable("Path", "$env:Path;$env:ProgramFiles\hadolint", "Machine")
-    #         }
-            
-    #         # Run Hadolint on Dockerfiles
-    #         Write-Host "Running Hadolint on Dockerfiles..."
-            
-    #         # Find all Dockerfiles recursively
-    #         $dockerfiles = Get-ChildItem -Recurse -Filter "Dockerfile*" -File
-            
-    #         if ($dockerfiles.Count -eq 0) {
-    #           Write-Host "No Dockerfiles found. Skipping Hadolint."
-    #           exit 0
-    #         }
-            
-    #         Write-Host "Found $($dockerfiles.Count) Dockerfile(s):"
-    #         $dockerfiles | ForEach-Object { Write-Host "  - $($_.FullName)" }
-            
-    #         # Run Hadolint on each Dockerfile
-    #         $errorsFound = $false
-    #         foreach ($dockerfile in $dockerfiles) {
-    #           Write-Host "`nLinting: $($dockerfile.FullName)"
+              # Run markdownlint on all markdown files, excluding node_modules
+              npx markdownlint "**/*.md" --ignore node_modules
+
+          displayName: 'HTMLHint Run'
+      
+      - job: LintBackend
+        displayName: Lint Python Backend
+
+        steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(backendPath)
+      
+              # Install dependencies
+              npm install
               
-    #           # Run Hadolint
-    #           if (Get-Command hadolint -ErrorAction SilentlyContinue) {
-    #             hadolint $dockerfile.FullName
-    #           } elseif (Test-Path $hadolintPath) {
-    #             & $hadolintPath $dockerfile.FullName
-    #           } else {
-    #             Write-Host "Hadolint not found. Please install manually."
-    #             exit 1
-    #           }
+              # Install markdownlint-cli if not in package.json
+              npm install --save-dev markdownlint-cli
               
-    #           # Check exit code
-    #           if ($LASTEXITCODE -ne 0) {
-    #             $errorsFound = $true
-    #           }
-    #         }
+              # Run markdownlint on all markdown files, excluding node_modules
+              npx markdownlint "**/*.md" --ignore node_modules
+
+          displayName: 'Markdownlint Install & Run'
+
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(backendPath)
+      
+              # Install dependencies
+              npm install
+              
+              # Install textlint and common presets if not in package.json
+              npm install --save-dev textlint textlint-rule-preset-ja-technical-writing
+              
+              # Run textlint on markdown files
+              npx textlint "**/*.md"
+
+          displayName: 'TextLint Install & Run'
+
+        - task: PyLint@0
+          displayName: Run PyLint
+          inputs:
+            pythonroot: '$(backendPath)'
+            reqfile: '$(backendPath)/requirements.txt'
+            modules: '.'
+
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Install Hadolint (Windows)
+              Write-Host "Installing Hadolint for Dockerfile linting..."
+              
+              # Method 1: Using Chocolatey (if available)
+              if (Get-Command choco -ErrorAction SilentlyContinue) {
+                Write-Host "Installing via Chocolatey..."
+                choco install hadolint -y
+              } else {
+                # Method 2: Download executable directly
+                Write-Host "Downloading Hadolint executable..."
+                $hadolintUrl = "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Windows-x86_64.exe"
+                $hadolintPath = "$env:TEMP\hadolint.exe"
+                
+                Invoke-WebRequest -Uri $hadolintUrl -OutFile $hadolintPath
+                
+                # Make it available globally
+                Copy-Item $hadolintPath "$env:ProgramFiles\hadolint\hadolint.exe"
+                [Environment]::SetEnvironmentVariable("Path", "$env:Path;$env:ProgramFiles\hadolint", "Machine")
+              }
             
-    #         if ($errorsFound) {
-    #           Write-Host "##vso[task.logissue type=error]Hadolint found issues in Dockerfile(s)"
-    #           Write-Host "##vso[task.complete result=Failed]"
-    #           exit 1
-    #         }
+              # Run Hadolint on Dockerfiles
+              Write-Host "Running Hadolint on Dockerfiles..."
+              
+              # Find all Dockerfiles recursively
+              $dockerfiles = Get-ChildItem -Recurse -Filter "Dockerfile*" -File
+              
+              if ($dockerfiles.Count -eq 0) {
+                Write-Host "No Dockerfiles found. Skipping Hadolint."
+                exit 0
+              }
             
-    #         Write-Host "✅ Hadolint completed successfully!"
-    #       displayName: 'Install and Run Hadolint'
+              Write-Host "Found $($dockerfiles.Count) Dockerfile(s):"
+              $dockerfiles | ForEach-Object { Write-Host "  - $($_.FullName)" }
+              
+              # Run Hadolint on each Dockerfile
+              $errorsFound = $false
+              foreach ($dockerfile in $dockerfiles) {
+                Write-Host "`nLinting: $($dockerfile.FullName)"
+                
+                # Run Hadolint
+                if (Get-Command hadolint -ErrorAction SilentlyContinue) {
+                  hadolint $dockerfile.FullName
+                } elseif (Test-Path $hadolintPath) {
+                  & $hadolintPath $dockerfile.FullName
+                } else {
+                  Write-Host "Hadolint not found. Please install manually."
+                  exit 1
+                }
+                
+                # Check exit code
+                if ($LASTEXITCODE -ne 0) {
+                  $errorsFound = $true
+                }
+              }
+            
+              if ($errorsFound) {
+                Write-Host "##vso[task.logissue type=error]Hadolint found issues in Dockerfile(s)"
+                Write-Host "##vso[task.complete result=Failed]"
+                exit 1
+              }
+              
+              Write-Host "✅ Hadolint completed successfully!"
+              
+          displayName: 'Install and Run Hadolint'
 
     # - stage: BuildAndPackage
       # displayName: Build & Artifact Packaging
