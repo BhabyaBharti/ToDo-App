@@ -317,6 +317,19 @@ stages:
               inputs:
                 versionSource: 'spec'
                 versionSpec: '16.x'
+
+            - task: PowerShell@2
+              displayName: Change to Frontend Directory
+              inputs:
+                targetType: 'inline'
+                script: |
+                  Write-Host "Current directory: $(Get-Location)"
+                  Write-Host "Changing to frontend directory: React_Todo_App_UI"
+                  cd "React_Todo_App_UI"
+                  Write-Host "Now in: $(Get-Location)"
+                  Write-Host "Files in directory:"
+                  Get-ChildItem
+
             
             - task: PowerShell@2
               displayName: Install Dependencies
@@ -336,6 +349,6 @@ stages:
                 artifact: 'todo-ui'
                 publishLocation: 'pipeline'
 
-          - job: BackendApplicationBuild
-            displayName: Backend Application Build
+          # - job: BackendApplicationBuild
+          #   displayName: Backend Application Build
 
