@@ -45,32 +45,32 @@ stages:
     # #   displayName: Static Code Analysis (SonarQube)
 
     # #   jobs:
-    # #       - job: SonarQubeScan
-    # #         displayName: SonarQube Scan
+# #       - job: SonarQubeScan
+# #         displayName: SonarQube Scan
 
-    # #         steps:
-    # #         - task: SonarQubePrepare@8
-    # #           inputs:
-    # #             SonarQube: 'SonarCloud'
-    # #             scannerMode: 'cli'
-    # #             configMode: 'manual'
-    # #             cliProjectKey: 'BhabyaBharti_ToDo-App'
-    # #             cliProjectName: 'ToDo-App'
-    # #             cliSources: '.'
-    # #             extraProperties: |
-    # #               sonar.organization=bhabyabharti
-    # #               sonar.host.url=https://sonarcloud.io
-    # #               sonar.tests=
-    # #               sonar.test.exclusions=**/*
+# #         steps:
+# #         - task: SonarQubePrepare@8
+# #           inputs:
+# #             SonarQube: 'SonarCloud'
+# #             scannerMode: 'cli'
+# #             configMode: 'manual'
+# #             cliProjectKey: 'BhabyaBharti_ToDo-App'
+# #             cliProjectName: 'ToDo-App'
+# #             cliSources: '.'
+# #             extraProperties: |
+# #               sonar.organization=bhabyabharti
+# #               sonar.host.url=https://sonarcloud.io
+# #               sonar.tests=
+# #               sonar.test.exclusions=**/*
 
-    # #         - task: SonarQubeAnalyze@8
-    # #           continueOnError: true
-    # #           inputs:
-    # #             jdkversion: 'JAVA_HOME_17_X64'
+# #         - task: SonarQubeAnalyze@8
+# #           continueOnError: true
+# #           inputs:
+# #             jdkversion: 'JAVA_HOME_17_X64'
 
-    # #         - task: SonarQubePublish@8
-    # #           inputs:
-    # #             pollingTimeoutSec: '300'
+# #         - task: SonarQubePublish@8
+# #           inputs:
+# #             pollingTimeoutSec: '300'
 
     # - stage: CodeQualityChecks
     #   displayName: Code Quality & Linting
