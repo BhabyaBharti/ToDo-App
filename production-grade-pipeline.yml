@@ -308,46 +308,47 @@ stages:
       displayName: Build & Artifact Packaging
       
       jobs:
-          - job: FrontendApplicationBuild
-            displayName: Frontend Application Build
-            
-            steps:
-            - task: NodeTool@0
-              displayName: Set Up Node.js Environment
-              inputs:
-                versionSource: 'spec'
-                versionSpec: '16.x'
+      - job: FrontendApplicationBuild
+        displayName: Frontend Application Build
+        
+        steps:
+        - task: NodeTool@0
+          displayName: Set Up Node.js Environment
+          inputs:
+            versionSource: 'spec'
+            versionSpec: '16.x'
 
-            - task: PowerShell@2
-              displayName: Change to Frontend Directory
-              inputs:
-                targetType: 'inline'
-                script: |
-                  Write-Host "Current directory: $(Get-Location)"
-                  Write-Host "Changing to frontend directory: React_Todo_App_UI"
-                  cd "React_Todo_App_UI"
-                  Write-Host "Now in: $(Get-Location)"
-                  Write-Host "Files in directory:"
-                  Get-ChildItem
+        - task: PowerShell@2
+          displayName: Change to Frontend Directory
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "Current directory: $(Get-Location)"
+              Write-Host "Changing to frontend directory: React_Todo_App_UI"
+              cd "React_Todo_App_UI"
+              Write-Host "Now in: $(Get-Location)"
+              Write-Host "Files in directory:"
+              Get-ChildItem
 
-            
-            - task: PowerShell@2
-              displayName: Install Dependencies
-              inputs:
-                  targetType: inline
-                  script: 'npm install'
+        
+        - task: PowerShell@2
+          displayName: Install Dependencies
+          inputs:
+              targetType: inline
+              script: 'npm install'
 
-            - task: PowerShell@2
-              displayName: Build Application
-              inputs:
-                  targetType: inline
-                  script: 'npm run build'
+        - task: PowerShell@2
+          displayName: Build Application
+          inputs:
+              targetType: inline
+              script: 'npm run build'
 
-            - task: PublishPipelineArtifact@1
-              inputs:
-                targetPath: '$(System.DefaultWorkingDirectory)/build/'
-                artifact: 'todo-ui'
-                publishLocation: 'pipeline'
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Build Artifacts
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)/build/'
+            artifact: 'todo-ui'
+            publishLocation: 'pipeline'
 
           # - job: BackendApplicationBuild
           #   displayName: Backend Application Build
