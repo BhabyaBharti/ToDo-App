@@ -4,19 +4,36 @@ variables:
 - group: toDo-App
 
 stages:
-    # - stage: SoftwareCompositionAnalysis
-    #   displayName: Software Composition Analysis
+    - stage: SoftwareCompositionAnalysis
+      displayName: Software Composition Analysis
 
-    #   jobs:
-    #   - job: DependencyVulnerabilityScan
-    #     displayName: Dependency Vulnerability Scan (Retire.js)
+      jobs:
+      - job: DependencyVulnerabilityScan
+        displayName: Dependency Vulnerability Scan (Retire.js)
 
-    #     steps:
-    #     - task: PowerShell@2
+        steps:
+        - task: PowerShell@2
           
-    #       inputs:
-    #         targetType: 'inline'
-    #         script: |
+          inputs:
+            targetType: 'inline'
+            script: |
+                Write-Host "===== INITIAL LOCATION ====="
+                Write-Host "PWD = $((Get-Location).Path)"
+      
+                Write-Host "===== CHANGING DIRECTORY ====="
+                cd $(System.DefaultWorkingDirectory)/$(frontendPath)
+      
+                Write-Host "===== AFTER CD LOCATION ====="
+                Write-Host "PWD = $((Get-Location).Path)"
+      
+                Write-Host "===== FILES IN CURRENT DIR ====="
+                Get-ChildItem | Select-Object Name
+      
+                Write-Host "===== RUNNING RETIRE ====="
+                npm install -g retire
+                npm install
+                retire --exitwith 0
+
     #             cd $(frontendPath)
     #             npm install
     #             npm install --save-dev retire
@@ -264,37 +281,37 @@ stages:
               
     #       displayName: 'Install and Run Hadolint'
 
-    - stage: BuildAndPackage
-      displayName: Build & Artifact Packaging
+    # - stage: BuildAndPackage
+    #   displayName: Build & Artifact Packaging
       
-      jobs:
-          - job: FrontendApplicationBuild
-            displayName: Frontend Application Build
+    #   jobs:
+    #       - job: FrontendApplicationBuild
+    #         displayName: Frontend Application Build
             
-            steps:
-            - task: NodeTool@0
-              displayName: Set Up Node.js Environment
-              inputs:
-                versionSource: 'spec'
-                versionSpec: '16.x'
+    #         steps:
+    #         - task: NodeTool@0
+    #           displayName: Set Up Node.js Environment
+    #           inputs:
+    #             versionSource: 'spec'
+    #             versionSpec: '16.x'
             
-            - task: PowerShell@2
-              displayName: Install Dependencies
-              inputs:
-                  targetType: inline
-                  script: 'npm install'
+    #         - task: PowerShell@2
+    #           displayName: Install Dependencies
+    #           inputs:
+    #               targetType: inline
+    #               script: 'npm install'
 
-            - task: PowerShell@2
-              displayName: Build Application
-              inputs:
-                  targetType: inline
-                  script: 'npm run build'
+    #         - task: PowerShell@2
+    #           displayName: Build Application
+    #           inputs:
+    #               targetType: inline
+    #               script: 'npm run build'
 
-            - task: PublishPipelineArtifact@1
-              inputs:
-                targetPath: '$(System.DefaultWorkingDirectory)/build/'
-                artifact: 'todo-ui'
-                publishLocation: 'pipeline'
+    #         - task: PublishPipelineArtifact@1
+    #           inputs:
+    #             targetPath: '$(System.DefaultWorkingDirectory)/build/'
+    #             artifact: 'todo-ui'
+    #             publishLocation: 'pipeline'
 
         #   - job: BackendApplicationBuild
         #     displayName: Backend Application Build
