@@ -61,10 +61,17 @@ stages:
                 Write-Host "===== FILES IN CURRENT DIR ====="
                 Get-ChildItem | Select-Object Name
       
-                Write-Host "===== RUNNING RETIRE ====="
-                npm install -g retire
+                Write-Host "===== INSTALL DEPENDENCIES ====="
                 npm install
-                retire --exitwith 0
+
+                Write-Host "===== RUNNING RETIRE.JS ====="
+                npx retire --path . --outputformat json --outputpath retire-report.json --exitwith 0
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Retire.js Report
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)/$(frontendPath)/retire-report.json'
+            artifact: 'retirejs-report'
+            publishLocation: 'pipeline'
 
     - stage: StaticCodeAnalysis
       displayName: Static Code Analysis (SonarQube)
