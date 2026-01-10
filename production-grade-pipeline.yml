@@ -32,8 +32,6 @@ parameters:
 
 pool:
   name: sh-app-delivery-pool
-  demands:
-    - Agent.Name -equals app-delivery-agent
 
 stages:
     - stage: SoftwareCompositionAnalysis
@@ -82,13 +80,6 @@ stages:
         displayName: SonarQube Scan
 
         steps:
-
-        - task: JavaToolInstaller@1
-          displayName: Install Java
-          inputs:
-            versionSpec: '17'
-            jdkArchitectureOption: 'x64'
-            jdkSourceOption: 'PreInstalled'
         - task: SonarQubePrepare@8
           inputs:
             SonarQube: 'SonarCloud'
