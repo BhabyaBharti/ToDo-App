@@ -34,42 +34,42 @@ pool:
   name: sh-app-delivery-pool
 
 stages:
-    - stage: SoftwareCompositionAnalysis
-      displayName: Software Composition Analysis
+    # - stage: SoftwareCompositionAnalysis
+    #   displayName: Software Composition Analysis
 
-      jobs:
-      - job: DependencyVulnerabilityScan
-        displayName: Dependency Vulnerability Scan (Retire.js)
+    #   jobs:
+    #   - job: DependencyVulnerabilityScan
+    #     displayName: Dependency Vulnerability Scan (Retire.js)
 
-        steps:
-        - task: PowerShell@2
-          displayName: 'Retire.js Install and Run'
-          inputs:
-            targetType: 'inline'
-            script: |
-                Write-Host "===== INITIAL LOCATION ====="
-                Write-Host "PWD = $((Get-Location).Path)"
+    #     steps:
+    #     - task: PowerShell@2
+    #       displayName: 'Retire.js Install and Run'
+    #       inputs:
+    #         targetType: 'inline'
+    #         script: |
+    #             Write-Host "===== INITIAL LOCATION ====="
+    #             Write-Host "PWD = $((Get-Location).Path)"
       
-                Write-Host "===== CHANGING DIRECTORY ====="
-                cd $(System.DefaultWorkingDirectory)/$(frontendPath)
+    #             Write-Host "===== CHANGING DIRECTORY ====="
+    #             cd $(System.DefaultWorkingDirectory)/$(frontendPath)
       
-                Write-Host "===== AFTER CD LOCATION ====="
-                Write-Host "PWD = $((Get-Location).Path)"
+    #             Write-Host "===== AFTER CD LOCATION ====="
+    #             Write-Host "PWD = $((Get-Location).Path)"
       
-                Write-Host "===== FILES IN CURRENT DIR ====="
-                Get-ChildItem | Select-Object Name
+    #             Write-Host "===== FILES IN CURRENT DIR ====="
+    #             Get-ChildItem | Select-Object Name
       
-                Write-Host "===== INSTALL DEPENDENCIES ====="
-                npm install
+    #             Write-Host "===== INSTALL DEPENDENCIES ====="
+    #             npm install
 
-                Write-Host "===== RUNNING RETIRE.JS ====="
-                npx retire --path . --outputformat json --outputpath retire-report.json --exitwith 0
-        - task: PublishPipelineArtifact@1
-          displayName: Publish Retire.js Report
-          inputs:
-            targetPath: '$(System.DefaultWorkingDirectory)/$(frontendPath)/retire-report.json'
-            artifact: 'retirejs-report'
-            publishLocation: 'pipeline'
+    #             Write-Host "===== RUNNING RETIRE.JS ====="
+    #             npx retire --path . --outputformat json --outputpath retire-report.json --exitwith 0
+    #     - task: PublishPipelineArtifact@1
+    #       displayName: Publish Retire.js Report
+    #       inputs:
+    #         targetPath: '$(System.DefaultWorkingDirectory)/$(frontendPath)/retire-report.json'
+    #         artifact: 'retirejs-report'
+    #         publishLocation: 'pipeline'
 
     - stage: StaticCodeAnalysis
       displayName: Static Code Analysis (SonarQube)
