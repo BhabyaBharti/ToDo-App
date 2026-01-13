@@ -529,8 +529,9 @@ stages:
                     downloadType: 'single'
                     artifactName: 'todo-ui'
                     downloadPath: '$(System.DeafultWorkingDirectory)/build_ui_artefacts'
-                - task: CopyFiles@2
+                - task: Bash@3
                   inputs:
-                    SourceFolder: '$(System.DeafultWorkingDirectory)/build_ui_artefacts'
-                    Contents: '**'
-                    TargetFolder: '/var/www/html'
+                    targetType: 'inline'
+                    script: |
+                      sudo cp -r $(System.DefaultWorkingDirectory)/build_ui_artefacts/* /var/www/html/
+                            sudo chown -R www-data:www-data /var/www/html
