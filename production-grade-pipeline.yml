@@ -103,10 +103,10 @@ stages:
     #       inputs:
     #         pollingTimeoutSec: '300'
 
-    - stage: CodeQualityChecks
-      displayName: Code Quality & Linting
+    # - stage: CodeQualityChecks
+    #   displayName: Code Quality & Linting
 
-      jobs:
+    #   jobs:
       # - job: LintFrontend
       #   displayName: 'Lint React Frontend'
 
@@ -210,284 +210,284 @@ stages:
 
       #     displayName: 'MarkdownLint Run'
           
-      - job: LintBackend
-        displayName: Lint Python Backend
+      # - job: LintBackend
+      #   displayName: Lint Python Backend
 
-        steps:
-        - task: PowerShell@2
-          continueOnError: true
-          inputs:
-            targetType: 'inline'
-            script: |
-              cd $(backendPath)/
-               # current dir
-               pwd
+      #   steps:
+      #   - task: PowerShell@2
+      #     continueOnError: true
+      #     inputs:
+      #       targetType: 'inline'
+      #       script: |
+      #         cd $(backendPath)/
+      #          # current dir
+      #          pwd
       
-              # Install dependencies
-              npm install
+      #         # Install dependencies
+      #         npm install
               
-              # Install markdownlint-cli if not in package.json
-              npm install --save-dev markdownlint-cli
+      #         # Install markdownlint-cli if not in package.json
+      #         npm install --save-dev markdownlint-cli
               
-              # Run markdownlint on all markdown files, excluding node_modules
-              npx markdownlint "**/*.md" --ignore node_modules
+      #         # Run markdownlint on all markdown files, excluding node_modules
+      #         npx markdownlint "**/*.md" --ignore node_modules
 
-          displayName: 'Markdownlint Install & Run'
+      #     displayName: 'Markdownlint Install & Run'
+
+      #   - task: PowerShell@2
+      #     continueOnError: true
+      #     inputs:
+      #       targetType: 'inline'
+      #       script: |
+      #         cd $(backendPath)
+      #          # current dir
+      #          pwd
+      #         # Install dependencies
+      #         npm install
+              
+      #         # Install textlint and common presets if not in package.json
+      #         npm install --save-dev textlint textlint-rule-preset-ja-technical-writing
+              
+      #         # Run textlint on markdown files
+      #         npx textlint "**/*.md"
+
+      #     displayName: 'TextLint Install & Run'
+
+      #   - task: PyLint@0
+      #     continueOnError: true
+      #     displayName: Run PyLint
+      #     inputs:
+      #       pythonroot: '$(backendPath)'
+      #       reqfile: '$(backendPath)/requirements.txt'
+      #       modules: '.'
+
+      #   - task: PowerShell@2
+      #     continueOnError: true
+      #     inputs:
+      #       targetType: 'inline'
+      #       script: |
+      #         # Install Hadolint (Windows)
+      #         Write-Host "Installing Hadolint for Dockerfile linting..."
+              
+      #         # Method 1: Using Chocolatey (if available)
+      #         if (Get-Command choco -ErrorAction SilentlyContinue) {
+      #           Write-Host "Installing via Chocolatey..."
+      #           choco install hadolint -y
+      #         } else {
+      #           # Method 2: Download executable directly
+      #           Write-Host "Downloading Hadolint executable..."
+      #           $hadolintUrl = "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Windows-x86_64.exe"
+      #           $hadolintPath = "$env:TEMP\hadolint.exe"
+                
+      #           Invoke-WebRequest -Uri $hadolintUrl -OutFile $hadolintPath
+                
+      #           # Make it available globally
+      #           Copy-Item $hadolintPath "$env:ProgramFiles\hadolint\hadolint.exe"
+      #           [Environment]::SetEnvironmentVariable("Path", "$env:Path;$env:ProgramFiles\hadolint", "Machine")
+      #         }
+            
+      #         # Run Hadolint on Dockerfiles
+      #         Write-Host "Running Hadolint on Dockerfiles..."
+              
+      #         # Find all Dockerfiles recursively
+      #         $dockerfiles = Get-ChildItem -Recurse -Filter "Dockerfile*" -File
+      #         # current dir
+      #          pwd
+              
+      #         if ($dockerfiles.Count -eq 0) {
+      #           Write-Host "No Dockerfiles found. Skipping Hadolint."
+      #           exit 0
+      #         }
+            
+      #         Write-Host "Found $($dockerfiles.Count) Dockerfile(s):"
+      #         $dockerfiles | ForEach-Object { Write-Host "  - $($_.FullName)" }
+              
+      #         # Run Hadolint on each Dockerfile
+      #         $errorsFound = $false
+      #         foreach ($dockerfile in $dockerfiles) {
+      #           Write-Host "`nLinting: $($dockerfile.FullName)"
+                
+      #           # Run Hadolint
+      #           if (Get-Command hadolint -ErrorAction SilentlyContinue) {
+      #             hadolint $dockerfile.FullName
+      #           } elseif (Test-Path $hadolintPath) {
+      #             & $hadolintPath $dockerfile.FullName
+      #           } else {
+      #             Write-Host "Hadolint not found. Please install manually."
+      #             exit 1
+      #           }
+                
+      #           # Check exit code
+      #           if ($LASTEXITCODE -ne 0) {
+      #             $errorsFound = $true
+      #           }
+      #         }
+            
+      #         if ($errorsFound) {
+      #           Write-Host "vso[task.logissue type=error]Hadolint found issues in Dockerfile(s)"
+      #           Write-Host "vso[task.complete result=Failed]"
+      #           exit 1
+      #         }
+              
+      #         Write-Host "✅ Hadolint completed successfully!"
+              
+      #     displayName: 'Install and Run Hadolint'
+
+    - stage: BuildAndPackage
+
+
+      displayName: Build & Artifact Packaging
+      
+      jobs:
+      - job: FrontendApplicationBuild
+        displayName: Frontend Application Build
+        
+        steps:
+        - task: NodeTool@0
+          displayName: Set Up Node.js Environment
+          inputs:
+            versionSource: 'spec'
+            versionSpec: '16.x'
 
         - task: PowerShell@2
-          continueOnError: true
+          displayName: Change to Frontend Directory
           inputs:
             targetType: 'inline'
             script: |
-              cd $(backendPath)
-               # current dir
-               pwd
-              # Install dependencies
-              npm install
-              
-              # Install textlint and common presets if not in package.json
-              npm install --save-dev textlint textlint-rule-preset-ja-technical-writing
-              
-              # Run textlint on markdown files
-              npx textlint "**/*.md"
-
-          displayName: 'TextLint Install & Run'
-
-        - task: PyLint@0
-          continueOnError: true
-          displayName: Run PyLint
-          inputs:
-            pythonroot: '$(backendPath)'
-            reqfile: '$(backendPath)/requirements.txt'
-            modules: '.'
-
-        - task: PowerShell@2
-          continueOnError: true
-          inputs:
-            targetType: 'inline'
-            script: |
-              # Install Hadolint (Windows)
-              Write-Host "Installing Hadolint for Dockerfile linting..."
-              
-              # Method 1: Using Chocolatey (if available)
-              if (Get-Command choco -ErrorAction SilentlyContinue) {
-                Write-Host "Installing via Chocolatey..."
-                choco install hadolint -y
-              } else {
-                # Method 2: Download executable directly
-                Write-Host "Downloading Hadolint executable..."
-                $hadolintUrl = "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Windows-x86_64.exe"
-                $hadolintPath = "$env:TEMP\hadolint.exe"
-                
-                Invoke-WebRequest -Uri $hadolintUrl -OutFile $hadolintPath
-                
-                # Make it available globally
-                Copy-Item $hadolintPath "$env:ProgramFiles\hadolint\hadolint.exe"
-                [Environment]::SetEnvironmentVariable("Path", "$env:Path;$env:ProgramFiles\hadolint", "Machine")
-              }
-            
-              # Run Hadolint on Dockerfiles
-              Write-Host "Running Hadolint on Dockerfiles..."
-              
-              # Find all Dockerfiles recursively
-              $dockerfiles = Get-ChildItem -Recurse -Filter "Dockerfile*" -File
-              # current dir
-               pwd
-              
-              if ($dockerfiles.Count -eq 0) {
-                Write-Host "No Dockerfiles found. Skipping Hadolint."
-                exit 0
-              }
-            
-              Write-Host "Found $($dockerfiles.Count) Dockerfile(s):"
-              $dockerfiles | ForEach-Object { Write-Host "  - $($_.FullName)" }
-              
-              # Run Hadolint on each Dockerfile
-              $errorsFound = $false
-              foreach ($dockerfile in $dockerfiles) {
-                Write-Host "`nLinting: $($dockerfile.FullName)"
-                
-                # Run Hadolint
-                if (Get-Command hadolint -ErrorAction SilentlyContinue) {
-                  hadolint $dockerfile.FullName
-                } elseif (Test-Path $hadolintPath) {
-                  & $hadolintPath $dockerfile.FullName
+              Write-Host "=== DEBUG: Checking directory structure ==="
+              Write-Host "Current directory: $(Get-Location)"
+              Write-Host ""
+              Write-Host "=== All files and folders ==="
+              Get-ChildItem
+              Write-Host ""
+              Write-Host "=== Checking for React_Todo_App_UI ==="
+              if (Test-Path "React_Todo_App_UI") {
+                Write-Host "✓ Found React_Todo_App_UI"
+                Write-Host "=== Contents of React_Todo_App_UI ==="
+                Get-ChildItem "React_Todo_App_UI"
+                Write-Host ""
+                Write-Host "=== Checking for package.json ==="
+                if (Test-Path "React_Todo_App_UI/package.json") {
+                  Write-Host "✓ Found package.json"
                 } else {
-                  Write-Host "Hadolint not found. Please install manually."
+                    Write-Host "✗ package.json NOT FOUND in React_Todo_App_UI"
+                  }
+                } else {
+                  Write-Host "✗ React_Todo_App_UI NOT FOUND"
+                }
+
+        
+        - task: PowerShell@2
+          displayName: Install Dependencies
+          inputs:
+              targetType: inline
+              script: |
+                Write-Host "=== Installing dependencies ==="
+                Write-Host "Current directory before cd: $(Get-Location)"
+                
+                if (Test-Path "React_Todo_App_UI") {
+                  cd "React_Todo_App_UI"
+                  Write-Host "Changed to: $(Get-Location)"
+                  Write-Host "Running npm install..."
+                  npm install
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Host "##vso[task.logissue type=error]npm install failed"
+                    exit 1
+                  }
+                } else {
+                  Write-Host "##vso[task.logissue type=error]React_Todo_App_UI directory not found"
+                  Write-Host "Available directories:"
+                  Get-ChildItem
                   exit 1
                 }
+
+        - task: PowerShell@2
+          displayName: Build Application
+          inputs:
+              targetType: inline
+              script: |
+                Write-Host "=== Building application ==="
+                Write-Host "Current directory before cd: $(Get-Location)"
                 
-                # Check exit code
-                if ($LASTEXITCODE -ne 0) {
-                  $errorsFound = $true
+                if (Test-Path "React_Todo_App_UI") {
+                  cd "React_Todo_App_UI"
+                  Write-Host "Changed to: $(Get-Location)"
+                  Write-Host "Running npm run build..."
+                  npm run build
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Host "##vso[task.logissue type=error]npm run build failed"
+                    exit 1
+                  }
+                  
+                  # Check if build folder was created
+                  if (Test-Path "build") {
+                    Write-Host "✓ Build folder created successfully"
+                    Write-Host "=== Contents of build folder ==="
+                    Get-ChildItem "build"
+                  } else {
+                    Write-Host "✗ Build folder not created"
+                      Write-Host "Current directory contents:"
+                      Get-ChildItem
+                    }
+                  } else {
+                    Write-Host "##vso[task.logissue type=error]React_Todo_App_UI directory not found"
+                    exit 1
+                  }
+
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Build Artifacts
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)/React_Todo_App_UI/build/'
+            artifact: 'todo-ui'
+            publishLocation: 'pipeline'
+
+      - job: BackendApplicationBuild
+        displayName: Backend Application Build
+        steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.x'
+            addToPath: true
+            architecture: 'x64'
+
+        - task: PowerShell@2
+          displayName: Install Python Dependencies
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "=== Installing Python dependencies ==="
+              Write-Host "Current directory: $(Get-Location)"
+              
+              if (Test-Path "PyTodoBackendMonolith") {
+                cd "PyTodoBackendMonolith"
+                Write-Host "Changed to: $(Get-Location)"
+                
+                if (Test-Path "requirements.txt") {
+                  Write-Host "Found requirements.txt"
+                  Write-Host "Running pip install -r requirements.txt..."
+                  pip install -r requirements.txt
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Host "##vso[task.logissue type=error]pip install failed"
+                    exit 1
+                  }
+                } else {
+                  Write-Host "✗ requirements.txt not found"
+                  Write-Host "Current directory contents:"
+                  Get-ChildItem
                 }
-              }
-            
-              if ($errorsFound) {
-                Write-Host "vso[task.logissue type=error]Hadolint found issues in Dockerfile(s)"
-                Write-Host "vso[task.complete result=Failed]"
+              } else {
+                Write-Host "✗ PyTodoBackendMonolith directory not found"
+                Write-Host "Available directories:"
+                Get-ChildItem
                 exit 1
               }
-              
-              Write-Host "✅ Hadolint completed successfully!"
-              
-          displayName: 'Install and Run Hadolint'
 
-    # - stage: BuildAndPackage
-
-
-    #   displayName: Build & Artifact Packaging
-      
-    #   jobs:
-    #   - job: FrontendApplicationBuild
-    #     displayName: Frontend Application Build
-        
-    #     steps:
-    #     - task: NodeTool@0
-    #       displayName: Set Up Node.js Environment
-    #       inputs:
-    #         versionSource: 'spec'
-    #         versionSpec: '16.x'
-
-    #     - task: PowerShell@2
-    #       displayName: Change to Frontend Directory
-    #       inputs:
-    #         targetType: 'inline'
-    #         script: |
-    #           Write-Host "=== DEBUG: Checking directory structure ==="
-    #           Write-Host "Current directory: $(Get-Location)"
-    #           Write-Host ""
-    #           Write-Host "=== All files and folders ==="
-    #           Get-ChildItem
-    #           Write-Host ""
-    #           Write-Host "=== Checking for React_Todo_App_UI ==="
-    #           if (Test-Path "React_Todo_App_UI") {
-    #             Write-Host "✓ Found React_Todo_App_UI"
-    #             Write-Host "=== Contents of React_Todo_App_UI ==="
-    #             Get-ChildItem "React_Todo_App_UI"
-    #             Write-Host ""
-    #             Write-Host "=== Checking for package.json ==="
-    #             if (Test-Path "React_Todo_App_UI/package.json") {
-    #               Write-Host "✓ Found package.json"
-    #             } else {
-    #                 Write-Host "✗ package.json NOT FOUND in React_Todo_App_UI"
-    #               }
-    #             } else {
-    #               Write-Host "✗ React_Todo_App_UI NOT FOUND"
-    #             }
-
-        
-    #     - task: PowerShell@2
-    #       displayName: Install Dependencies
-    #       inputs:
-    #           targetType: inline
-    #           script: |
-    #             Write-Host "=== Installing dependencies ==="
-    #             Write-Host "Current directory before cd: $(Get-Location)"
-                
-    #             if (Test-Path "React_Todo_App_UI") {
-    #               cd "React_Todo_App_UI"
-    #               Write-Host "Changed to: $(Get-Location)"
-    #               Write-Host "Running npm install..."
-    #               npm install
-    #               if ($LASTEXITCODE -ne 0) {
-    #                 Write-Host "##vso[task.logissue type=error]npm install failed"
-    #                 exit 1
-    #               }
-    #             } else {
-    #               Write-Host "##vso[task.logissue type=error]React_Todo_App_UI directory not found"
-    #               Write-Host "Available directories:"
-    #               Get-ChildItem
-    #               exit 1
-    #             }
-
-    #     - task: PowerShell@2
-    #       displayName: Build Application
-    #       inputs:
-    #           targetType: inline
-    #           script: |
-    #             Write-Host "=== Building application ==="
-    #             Write-Host "Current directory before cd: $(Get-Location)"
-                
-    #             if (Test-Path "React_Todo_App_UI") {
-    #               cd "React_Todo_App_UI"
-    #               Write-Host "Changed to: $(Get-Location)"
-    #               Write-Host "Running npm run build..."
-    #               npm run build
-    #               if ($LASTEXITCODE -ne 0) {
-    #                 Write-Host "##vso[task.logissue type=error]npm run build failed"
-    #                 exit 1
-    #               }
-                  
-    #               # Check if build folder was created
-    #               if (Test-Path "build") {
-    #                 Write-Host "✓ Build folder created successfully"
-    #                 Write-Host "=== Contents of build folder ==="
-    #                 Get-ChildItem "build"
-    #               } else {
-    #                 Write-Host "✗ Build folder not created"
-    #                   Write-Host "Current directory contents:"
-    #                   Get-ChildItem
-    #                 }
-    #               } else {
-    #                 Write-Host "##vso[task.logissue type=error]React_Todo_App_UI directory not found"
-    #                 exit 1
-    #               }
-
-    #     - task: PublishPipelineArtifact@1
-    #       displayName: Publish Build Artifacts
-    #       inputs:
-    #         targetPath: '$(System.DefaultWorkingDirectory)/React_Todo_App_UI/build/'
-    #         artifact: 'todo-ui'
-    #         publishLocation: 'pipeline'
-
-    #   - job: BackendApplicationBuild
-    #     displayName: Backend Application Build
-    #     steps:
-    #     - task: UsePythonVersion@0
-    #       inputs:
-    #         versionSpec: '3.x'
-    #         addToPath: true
-    #         architecture: 'x64'
-
-    #     - task: PowerShell@2
-    #       displayName: Install Python Dependencies
-    #       inputs:
-    #         targetType: 'inline'
-    #         script: |
-    #           Write-Host "=== Installing Python dependencies ==="
-    #           Write-Host "Current directory: $(Get-Location)"
-              
-    #           if (Test-Path "PyTodoBackendMonolith") {
-    #             cd "PyTodoBackendMonolith"
-    #             Write-Host "Changed to: $(Get-Location)"
-                
-    #             if (Test-Path "requirements.txt") {
-    #               Write-Host "Found requirements.txt"
-    #               Write-Host "Running pip install -r requirements.txt..."
-    #               pip install -r requirements.txt
-    #               if ($LASTEXITCODE -ne 0) {
-    #                 Write-Host "##vso[task.logissue type=error]pip install failed"
-    #                 exit 1
-    #               }
-    #             } else {
-    #               Write-Host "✗ requirements.txt not found"
-    #               Write-Host "Current directory contents:"
-    #               Get-ChildItem
-    #             }
-    #           } else {
-    #             Write-Host "✗ PyTodoBackendMonolith directory not found"
-    #             Write-Host "Available directories:"
-    #             Get-ChildItem
-    #             exit 1
-    #           }
-
-    #     - task: PublishPipelineArtifact@1
-    #       displayName: Publish Backend Artifacts
-    #       inputs:
-    #         targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
-    #         artifact: 'todo-backend'
-    #         publishLocation: 'pipeline'
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Backend Artifacts
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
+            artifact: 'todo-backend'
+            publishLocation: 'pipeline'
 
     # - stage: ApprovalGate
     #   displayName: Appoval Gate
