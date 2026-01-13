@@ -528,7 +528,7 @@ stages:
                     buildId: '630'
                     downloadType: 'single'
                     artifactName: 'todo-ui'
-                    downloadPath: '$(System.DeafultWorkingDirectory)/build_ui_artefacts'
+                    downloadPath: '$(Build.SourcesDirectory)/build_ui_artefacts'
                 - task: Bash@3
                   inputs:
                     targetType: 'inline'
