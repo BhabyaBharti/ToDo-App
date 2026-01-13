@@ -333,12 +333,12 @@ stages:
               
       #     displayName: 'Install and Run Hadolint'
 
-    # - stage: BuildAndPackage
+    - stage: BuildAndPackage
 
 
-    #   displayName: Build & Artifact Packaging
+      displayName: Build & Artifact Packaging
       
-    #   jobs:
+      jobs:
     #   - job: FrontendApplicationBuild
     #     displayName: Frontend Application Build
         
@@ -441,53 +441,54 @@ stages:
     #         artifact: 'todo-ui'
     #         publishLocation: 'pipeline'
 
-    #   - job: BackendApplicationBuild
-    #     displayName: Backend Application Build
-    #     steps:
-    #     - task: UsePythonVersion@0
-    #       inputs:
-    #         versionSpec: '3.x'
-    #         addToPath: true
-    #         architecture: 'x64'
+      - job: BackendApplicationBuild
+        displayName: Backend Application Build
+        steps:
+        - task: UsePythonVersion@0
+          displayName: 'Use Python 3.10'
+          inputs:
+            versionSpec: '3.10'
+            addToPath: true
+            architecture: 'x64'
 
-    #     - task: PowerShell@2
-    #       displayName: Install Python Dependencies
-    #       inputs:
-    #         targetType: 'inline'
-    #         script: |
-    #           Write-Host "=== Installing Python dependencies ==="
-    #           Write-Host "Current directory: $(Get-Location)"
+        - task: PowerShell@2
+          displayName: Install Python Dependencies
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Host "=== Installing Python dependencies ==="
+              Write-Host "Current directory: $(Get-Location)"
               
-    #           if (Test-Path "PyTodoBackendMonolith") {
-    #             cd "PyTodoBackendMonolith"
-    #             Write-Host "Changed to: $(Get-Location)"
+              if (Test-Path "PyTodoBackendMonolith") {
+                cd "PyTodoBackendMonolith"
+                Write-Host "Changed to: $(Get-Location)"
                 
-    #             if (Test-Path "requirements.txt") {
-    #               Write-Host "Found requirements.txt"
-    #               Write-Host "Running pip install -r requirements.txt..."
-    #               pip install -r requirements.txt
-    #               if ($LASTEXITCODE -ne 0) {
-    #                 Write-Host "##vso[task.logissue type=error]pip install failed"
-    #                 exit 1
-    #               }
-    #             } else {
-    #               Write-Host "✗ requirements.txt not found"
-    #               Write-Host "Current directory contents:"
-    #               Get-ChildItem
-    #             }
-    #           } else {
-    #             Write-Host "✗ PyTodoBackendMonolith directory not found"
-    #             Write-Host "Available directories:"
-    #             Get-ChildItem
-    #             exit 1
-    #           }
+                if (Test-Path "requirements.txt") {
+                  Write-Host "Found requirements.txt"
+                  Write-Host "Running pip install -r requirements.txt..."
+                  pip install -r requirements.txt
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Host "##vso[task.logissue type=error]pip install failed"
+                    exit 1
+                  }
+                } else {
+                  Write-Host "✗ requirements.txt not found"
+                  Write-Host "Current directory contents:"
+                  Get-ChildItem
+                }
+              } else {
+                Write-Host "✗ PyTodoBackendMonolith directory not found"
+                Write-Host "Available directories:"
+                Get-ChildItem
+                exit 1
+              }
 
-    #     - task: PublishPipelineArtifact@1
-    #       displayName: Publish Backend Artifacts
-    #       inputs:
-    #         targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
-    #         artifact: 'todo-backend'
-    #         publishLocation: 'pipeline'
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Backend Artifacts
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
+            artifact: 'todo-backend'
+            publishLocation: 'pipeline'
 
     # - stage: ApprovalGate
     #   displayName: Appoval Gate
@@ -502,36 +503,36 @@ stages:
     #           notifyUsers: 'devopscollab101@gmail.com'
     #           onTimeout: 'resume'
 
-    - stage: DeployToDev
-      displayName: Deploy to Dev environment
-      #condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    # - stage: DeployToDev
+    #   displayName: Deploy to Dev environment
+    #   #condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
 
-      jobs:
-        - deployment: DeployToDev
-          displayName: Deploy To Dev
+    #   jobs:
+    #     - deployment: DeployToDev
+    #       displayName: Deploy To Dev
 
-          environment:
-            name: dev
-            resourceName: 'frontendv31WMYP'
-            resourceType: virtualMachine
-          strategy:
-            runOnce:
-              deploy:
-                steps:
-                - task: DownloadBuildArtifacts@1
-                  inputs:
-                    buildType: 'specific'
-                    project: '8b8cab46-ede3-44b6-a546-5442c39ab271'
-                    pipeline: '40'
-                    specificBuildWithTriggering: true
-                    buildVersionToDownload: 'specific'
-                    buildId: '630'
-                    downloadType: 'single'
-                    artifactName: 'todo-ui'
-                    downloadPath: '$(Build.SourcesDirectory)/build_ui_artefacts'
-                - task: Bash@3
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      sudo cp -r $(System.DefaultWorkingDirectory)/build_ui_artefacts/* /var/www/html/
-                            sudo chown -R www-data:www-data /var/www/html
+    #       environment:
+    #         name: dev
+    #         resourceName: 'frontendv31WMYP'
+    #         resourceType: virtualMachine
+    #       strategy:
+    #         runOnce:
+    #           deploy:
+    #             steps:
+    #             - task: DownloadBuildArtifacts@1
+    #               inputs:
+    #                 buildType: 'specific'
+    #                 project: '8b8cab46-ede3-44b6-a546-5442c39ab271'
+    #                 pipeline: '40'
+    #                 specificBuildWithTriggering: true
+    #                 buildVersionToDownload: 'specific'
+    #                 buildId: '630'
+    #                 downloadType: 'single'
+    #                 artifactName: 'todo-ui'
+    #                 downloadPath: '$(Build.SourcesDirectory)/build_ui_artefacts'
+    #             - task: Bash@3
+    #               inputs:
+    #                 targetType: 'inline'
+    #                 script: |
+    #                   sudo cp -r $(System.DefaultWorkingDirectory)/build_ui_artefacts/* /var/www/html/
+    #                         sudo chown -R www-data:www-data /var/www/html
