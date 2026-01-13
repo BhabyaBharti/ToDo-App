@@ -444,20 +444,32 @@ stages:
       - job: BackendApplicationBuild
         displayName: Backend Application Build
         steps:
+
         - task: PowerShell@2
-          displayName: Bypass Poweshell Exec Policy
+          displayName: Check and Install Python
           inputs:
             targetType: 'inline'
             script: |
-              # This fixes the current error
-              Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-              Write-Host "PowerShell execution policy set to Bypass"
-
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '3.10'
-            addToPath: true
-            architecture: 'x64'
+              # Check if Python is already installed
+                      if (Test-Path "C:\Python310\python.exe") {
+                          Write-Host "Python already installed at C:\Python310"
+                          # Add to PATH for current session
+                          $env:Path = "C:\Python310;C:\Python310\Scripts;$env:Path"
+                      } else {
+                          Write-Host "Python not found, installing..."
+                          # Download and install Python
+                          $pythonUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe"
+                          $installerPath = "$env:TEMP\python-installer.exe"
+                          
+                          Invoke-WebRequest -Uri $pythonUrl -OutFile $installerPath -UseBasicParsing
+                          Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+                          
+                          # Update PATH
+                          $env:Path = "C:\Python310;C:\Python310\Scripts;$env:Path"
+                      }
+                      
+                      Write-Host "Python version:"
+                      python --version
 
         - task: PowerShell@2
           displayName: Install Python Dependencies
