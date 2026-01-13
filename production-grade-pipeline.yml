@@ -445,31 +445,15 @@ stages:
         displayName: Backend Application Build
         steps:
 
-        - task: PowerShell@2
-          displayName: Check and Install Python
+        - task: UsePythonVersion@0
+          displayName: 'Install Python 3.10'
           inputs:
-            targetType: 'inline'
-            script: |
-              # Check if Python is already installed
-                      if (Test-Path "C:\Python310\python.exe") {
-                          Write-Host "Python already installed at C:\Python310"
-                          # Add to PATH for current session
-                          $env:Path = "C:\Python310;C:\Python310\Scripts;$env:Path"
-                      } else {
-                          Write-Host "Python not found, installing..."
-                          # Download and install Python
-                          $pythonUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe"
-                          $installerPath = "$env:TEMP\python-installer.exe"
-                          
-                          Invoke-WebRequest -Uri $pythonUrl -OutFile $installerPath -UseBasicParsing
-                          Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
-                          
-                          # Update PATH
-                          $env:Path = "C:\Python310;C:\Python310\Scripts;$env:Path"
-                      }
-                      
-                      Write-Host "Python version:"
-                      python --version
+            versionSpec: '3.10'
+            addToPath: true
+            architecture: 'x64'
+          # Add this to fix the execution policy for this task
+          env:
+            _PS_EXEC_POLICY: 'Bypass'
 
         - task: PowerShell@2
           displayName: Install Python Dependencies
