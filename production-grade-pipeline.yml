@@ -444,12 +444,14 @@ stages:
       - job: BackendApplicationBuild
         displayName: Backend Application Build
         steps:
-        # - task: UsePythonVersion@0
-        #   displayName: 'Use Python 3.10'
-        #   inputs:
-        #     versionSpec: '3.10'
-        #     addToPath: true
-        #     architecture: 'x64'
+        - task: PowerShell@2
+          displayName: Bypass Poweshell Exec Policy
+          inputs:
+            targetType: 'inline'
+            script: |
+              # This fixes the current error
+              Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+              Write-Host "PowerShell execution policy set to Bypass"
 
         - task: UsePythonVersion@0
           inputs:
