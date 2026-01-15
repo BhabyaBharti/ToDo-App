@@ -333,12 +333,10 @@ stages:
               
       #     displayName: 'Install and Run Hadolint'
 
-    - stage: BuildAndPackage
-
-
-      displayName: Build & Artifact Packaging
+    # - stage: BuildAndPackage
+    #   displayName: Build & Artifact Packaging
       
-      jobs:
+    #   jobs:
     #   - job: FrontendApplicationBuild
     #     displayName: Frontend Application Build
         
@@ -441,10 +439,13 @@ stages:
     #         artifact: 'todo-ui'
     #         publishLocation: 'pipeline'
 
-      - job: BackendApplicationBuild
-        displayName: Backend Application Build
+    - stage: BuildAndPackage
+      displayName: Build & Artifact Packaging
+      
+      jobs:
+      - job: BuildBackend
+        displayName: Build Backend
         steps:
-
         - task: PowerShell@2
           displayName: Install Python Dependencies
           inputs:
@@ -453,14 +454,33 @@ stages:
               Write-Host "=== Installing Python dependencies ==="
               Write-Host "Current directory: $(Get-Location)"
               
-              if (Test-Path "PyTodoBackendMonolith") {
-                cd "PyTodoBackendMonolith"
-                Write-Host "Changed to: $(Get-Location)"
+              # Check if Python is available
+              $pythonCmd = "python"
+              if (-not (Get-Command $pythonCmd -ErrorAction SilentlyContinue)) {
+                    # Try python3
+                $pythonCmd = "python3"
+                if (-not (Get-Command $pythonCmd -ErrorAction SilentlyContinue)) {
+                  Write-Host "##vso[task.logissue type=error]Python not found in PATH"
+                  Write-Host "Available commands:"
+                  Get-Command | Select-Object Name | Out-Host
+                  exit 1
+                }
+              }
+          
+                  Write-Host "Using Python command: $pythonCmd"
+                  
+                  if (Test-Path "PyTodoBackendMonolith") {
+                    cd "PyTodoBackendMonolith"
+                    Write-Host "Changed to: $(Get-Location)"
                 
                 if (Test-Path "requirements.txt") {
                   Write-Host "Found requirements.txt"
                   Write-Host "Running pip install -r requirements.txt..."
-                  pip install -r requirements.txt
+                  
+                  # Use python -m pip instead of just pip
+                  & $pythonCmd -m pip install --upgrade pip
+                  & $pythonCmd -m pip install -r requirements.txt
+                  
                   if ($LASTEXITCODE -ne 0) {
                     Write-Host "##vso[task.logissue type=error]pip install failed"
                     exit 1
@@ -477,12 +497,48 @@ stages:
                 exit 1
               }
 
-        - task: PublishPipelineArtifact@1
-          displayName: Publish Backend Artifacts
-          inputs:
-            targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
-            artifact: 'todo-backend'
-            publishLocation: 'pipeline'
+      # - job: BackendApplicationBuild
+      #   displayName: Backend Application Build
+      #   steps:
+
+      #   - task: PowerShell@2
+      #     displayName: Install Python Dependencies
+      #     inputs:
+      #       targetType: 'inline'
+      #       script: |
+      #         Write-Host "=== Installing Python dependencies ==="
+      #         Write-Host "Current directory: $(Get-Location)"
+              
+      #         if (Test-Path "PyTodoBackendMonolith") {
+      #           cd "PyTodoBackendMonolith"
+      #           Write-Host "Changed to: $(Get-Location)"
+                
+      #           if (Test-Path "requirements.txt") {
+      #             Write-Host "Found requirements.txt"
+      #             Write-Host "Running pip install -r requirements.txt..."
+      #             pip install -r requirements.txt
+      #             if ($LASTEXITCODE -ne 0) {
+      #               Write-Host "##vso[task.logissue type=error]pip install failed"
+      #               exit 1
+      #             }
+      #           } else {
+      #             Write-Host "✗ requirements.txt not found"
+      #             Write-Host "Current directory contents:"
+      #             Get-ChildItem
+      #           }
+      #         } else {
+      #           Write-Host "✗ PyTodoBackendMonolith directory not found"
+      #           Write-Host "Available directories:"
+      #           Get-ChildItem
+      #           exit 1
+      #         }
+
+      #   - task: PublishPipelineArtifact@1
+      #     displayName: Publish Backend Artifacts
+      #     inputs:
+      #       targetPath: '$(System.DefaultWorkingDirectory)/PyTodoBackendMonolith/'
+      #       artifact: 'todo-backend'
+      #       publishLocation: 'pipeline'
 
     # - stage: ApprovalGate
     #   displayName: Appoval Gate
