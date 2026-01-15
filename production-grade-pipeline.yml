@@ -535,18 +535,18 @@ stages:
     #         artifact: 'todo-backend'
     #         publishLocation: 'pipeline'
 
-    - stage: ApprovalGate
-      displayName: Appoval Gate
-      pool: server
+    # - stage: ApprovalGate
+    #   displayName: Appoval Gate
+    #   pool: server
 
-      jobs:
-        - job: ManualValidation
-          displayName: ManualValidation
-          steps:
-          - task: ManualValidation@1
-            inputs:
-              notifyUsers: 'devopscollab101@gmail.com'
-              onTimeout: 'resume'
+    #   jobs:
+    #     - job: ManualValidation
+    #       displayName: ManualValidation
+    #       steps:
+    #       - task: ManualValidation@1
+    #         inputs:
+    #           notifyUsers: 'devopscollab101@gmail.com'
+    #           onTimeout: 'resume'
 
     - stage: DeployToDev
       displayName: Deploy to Dev environment
@@ -557,8 +557,8 @@ stages:
           displayName: Deploy To Dev
 
           environment:
-            name: dev
-            resourceName: 'frontendv31WMYP'
+            name: frontendDev
+            resourceName: 'frontendv4YKREE'
             resourceType: virtualMachine
           strategy:
             runOnce:
@@ -584,10 +584,11 @@ stages:
 
         - deployment: DeployBackendToDev
           displayName: Deploy Backend To Dev
+          dependsOn: DeployFrontendToDev
 
           environment:
             name: backendDev
-            resourceName: 
+            resourceName: backendvmXH5F57
             resourceType: virtualMachine
           strategy:
             runOnce:
@@ -609,7 +610,7 @@ stages:
                     targetType: 'inline'
                     script: |
                       sudo cp -r $(System.DefaultWorkingDirectory)/build_ui_artefacts/* /var/www/html/
-                            sudo chown -R www-data:www-data /var/www/html
+                            sudo chown -R www-data:www-data /home/authusersai123/backendArtifacts
 
                 - task: Bash@3
                   inputs:
