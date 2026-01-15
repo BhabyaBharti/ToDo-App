@@ -445,16 +445,6 @@ stages:
         displayName: Backend Application Build
         steps:
 
-        - task: UsePythonVersion@0
-          displayName: 'Install Python 3.10'
-          inputs:
-            versionSpec: '3.10'
-            addToPath: true
-            architecture: 'x64'
-          # Add this to fix the execution policy for this task
-          env:
-            _PS_EXEC_POLICY: 'Bypass'
-
         - task: PowerShell@2
           displayName: Install Python Dependencies
           inputs:
