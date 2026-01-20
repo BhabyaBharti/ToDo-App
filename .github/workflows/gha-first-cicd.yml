@@ -10,3 +10,6 @@ jobs:
 
       - name: Check Date
         run: date
+
+      - name: Call Secret
+        run: echo "${{ secrets.KV_SECRET }}"
