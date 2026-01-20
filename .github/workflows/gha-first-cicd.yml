@@ -12,4 +12,4 @@ jobs:
         run: date
 
       - name: Call Secret
-        run: echo "${{ secrets.KV_SECRET }}"
+        run: echo "${{ secrets.KV_KEY }}"
