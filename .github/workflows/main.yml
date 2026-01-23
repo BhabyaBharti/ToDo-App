@@ -24,8 +24,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install azure-mgmt-resource
 
-      - name: Run Script
+      - name: 'Az CLI Login'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_SP_CREDENTIALS }}
+
+      - name: Run Script with Azure Context
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: "dummy-tenant"
+          AZURE_TENANT_ID: ${{ secretS.AZURE_TENANT_ID }}
         run: python script.py
